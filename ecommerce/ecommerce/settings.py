@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9esc44l6py8a*+hx(lijxnl**fu!+q^_)qpxxz14%8c7lo-q27'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.onrender.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -118,15 +118,18 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'nitishlal154@gmail.com'
-EMAIL_HOST_PASSWORD = 'hkdnayouhnbjeeer'
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-OPENAI_API_KEY="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"
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 
 STATICFILES_DIRS=[
     os.path.join(BASE_DIR,"static")
