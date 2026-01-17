@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Contact{% endblock title %}
+{% block body %}
+    <h1 class="text-center mt-4"><strong><i>Contact Us</i></strong></h1>
+    <div class="container mt-2 w-50">
+        {% for message in messages %}
+     <div class="alert alert-{{message.tags}} alert-dismissible fade show " role="alert">
+       <strong>{{message}}</strong>
+       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+     </div>
+  {% endfor %}
+       <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <form action="/contact/" method="post">
+            {% csrf_token %}
+            <
+
+            <div class="mb-3 text-start">
+                <label class="text-white mb-1">Full Name</label>
+                <input type="text" name="name" class="form-control"
+                    placeholder="Enter your Full Name"
+                    value="{% if user.is_authenticated %}{{ user.username }}{% endif %}">
+            </div>
+            <div class="mb-3 text-start">
+                <label class="text-white mb-1">Email</label>
+                <input type="email" name="email" class="form-control"
+           placeholder="Enter your email"
+           value="{% if user.is_authenticated %}{{ user.email }}{% endif %}">
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="text-white mb-1">How Can I Help You</label>
+                <textarea type="text" name="desc" class="form-control"
+                       placeholder="How Can I Help You?"
+                       style="border-radius: 10px; padding: 012px;"></textarea>
+            </div>
+
+            <div class="mb-3 text-start">
+                <label class="text-white mb-1">Phone Number</label>
+                <input type="Number" name="phn" class="form-control"
+                       placeholder="Enter Phone Number "
+                       style="border-radius: 10px; padding: 12px;">
+            </div>
+
+            <button class="btn w-20 mt-2 mb-5"
+                    style="
+                        background: #e43c5c;
+                        color: white;
+                        padding: 12px;
+                        border-radius: 10px;
+                        font-size: 16px;
+                        font-weight: 600;
+                        letter-spacing: 1px;
+                        text-transform: uppercase;
+                    ">
+                Submit
+            </button>
+        </form>
+        </div>
+        <div class="col-md-3"></div>
+       </div>
+    </div>
+{% endblock body %}

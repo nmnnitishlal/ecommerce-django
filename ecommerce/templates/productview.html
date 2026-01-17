@@ -1,0 +1,203 @@
+{% block title %}Product Details{% endblock title %}
+{% block hero %}{% endblock hero %}
+{% block body %}
+
+<div style="max-width:1650px;margin:25px auto;font-family:Segoe UI, Arial;">
+
+  <div style="display:flex;gap:55px;align-items:flex-start;flex-wrap:wrap;">
+
+
+    <!-- ================= LEFT SIDE IMAGE ================= -->
+    <div style="flex:1.4;display:flex;justify-content:center;min-width:500px;">
+
+      <div id="zoomBox" style="
+        border:1px solid #ddd;
+        border-radius:18px;
+        width:100%;
+        height:900px;
+        padding:28px;
+        background:white;
+        overflow:hidden;
+        cursor:zoom-in;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        box-shadow:0 20px 45px rgba(0,0,0,.15);
+      ">
+
+        <img id="zoomImg" src="/media/{{product.image}}"
+        style="
+          width:100%;
+          height:100%;
+          object-fit:contain;
+          transition:transform .25s ease-out;
+        ">
+      </div>
+
+    </div>
+
+
+
+    <!-- ================= RIGHT SIDE DETAILS ================= -->
+    <div style="flex:1;min-width:450px;">
+
+      <h1 style="font-weight:900;color:#111;margin-bottom:18px;">
+        {{product.product_name}}
+      </h1>
+
+      <h1 style="color:#B12704;font-weight:900;margin-top:14px;font-size:38px;">
+        ₹ {{product.price}}
+      </h1>
+
+      <p style="color:green;font-weight:800;margin-top:12px;">
+        ✔ In Stock
+      </p>
+
+      <p style="font-size:16px;color:#444;line-height:28px;margin-top:10px;">
+        {{product.desc}}
+      </p>
+
+      <button onclick="addToCart({{product.id}})"
+      style="
+        width:300px;
+        margin-top:20px;
+        background:#FFD814;
+        color:#111;
+        border:none;
+        padding:15px;
+        border-radius:30px;
+        font-size:17px;
+        font-weight:900;
+        box-shadow:0 10px 25px rgba(0,0,0,.15);
+      ">
+        🛒 Add to Cart
+      </button>
+
+      
+
+      <a href="/" style="text-decoration:none;">
+        <p style="margin-top:22px;color:#007185;">← Back to Home</p>
+      </a>
+
+      <hr style="margin-top:25px;">
+
+
+
+      <!-- ================= FEEDBACK SECTION ================= -->
+
+      <h2 style="font-weight:900;margin-top:10px;">Customer Feedback</h2>
+
+
+      <!-- ===== Feedback Form ===== -->
+      <form method="POST">
+        {% csrf_token %}
+
+        <textarea name="comment" required
+        placeholder="Write your feedback..."
+        style="width:100%;padding:12px;border-radius:12px;border:1px solid #ccc;">
+        </textarea>
+
+        <select name="rating"
+        style="margin-top:10px;padding:8px;border-radius:10px;">
+          <option value="5">5 ⭐</option>
+          <option value="4">4 ⭐</option>
+          <option value="3">3 ⭐</option>
+          <option value="2">2 ⭐</option>
+          <option value="1">1 ⭐</option>
+        </select>
+
+        <button style="
+          margin-top:10px;
+          background:#000;
+          color:#fff;
+          border:none;
+          padding:10px 20px;
+          border-radius:25px;
+          font-weight:900;">
+          Submit
+        </button>
+
+      </form>
+
+
+
+      <!-- ===== SHOW FEEDBACK ===== -->
+      {% for fb in feedbacks %}
+
+      <div style="
+        margin-top:12px;
+        padding:12px;
+        background:#f5f5f5;
+        border-radius:12px;
+      ">
+
+        <strong>
+          {% if fb.user %}
+            {{fb.user.username}}
+          {% else %}
+            Guest
+          {% endif %}
+        </strong>
+
+        <p style="margin:6px 0;">{{fb.comment}}</p>
+
+
+        <!-- ⭐⭐⭐⭐☆ -->
+        <div style="color:#FFA41C;font-size:18px;">
+          {% for i in "12345" %}
+            {% if forloop.counter <= fb.rating %}
+              ⭐
+            {% else %}
+              ☆
+            {% endif %}
+          {% endfor %}
+        </div>
+
+        <small style="color:#777;">
+          {{fb.created_at}}
+        </small>
+
+      </div>
+
+      {% endfor %}
+
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- ================= IMAGE ZOOM ================= -->
+<script>
+let box=document.getElementById("zoomBox");
+let img=document.getElementById("zoomImg");
+
+box.addEventListener("mousemove",e=>{
+ let r=box.getBoundingClientRect();
+ let x=((e.clientX-r.left)/r.width)*100;
+ let y=((e.clientY-r.top)/r.height)*100;
+ img.style.transformOrigin=x+"% "+y+"%";
+ img.style.transform="scale(3.2)";
+});
+
+box.addEventListener("mouseleave",()=>img.style.transform="scale(1)");
+</script>
+
+
+
+<!-- ================= CART ================= -->
+<script>
+function addToCart(id){
+ let cart=localStorage.getItem("cart")?
+ JSON.parse(localStorage.getItem("cart")):{};
+
+ if(cart['pr'+id]) cart['pr'+id][0]+=1;
+ else cart['pr'+id]=[1,"{{product.product_name}}","{{product.price}}"];
+
+ localStorage.setItem("cart",JSON.stringify(cart));
+ alert("Item added to cart 🙂");
+}
+</script>
+
+{% endblock body %}

@@ -1,0 +1,263 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>
+    Ecommerce - {% block title %}{% endblock title %}
+  </title>
+
+  <!-- Bootstrap -->
+  <link href="{% static '/assets/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static '/assets/vendor/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link href="{% static '/assets/css/main.css' %}" rel="stylesheet">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+<style>
+
+body{
+  font-family:'Poppins',sans-serif;
+}
+
+/* ---------- SEARCH UI DESIGN ---------- */
+
+.search-container{
+  position: relative;
+  width: 400px;
+}
+
+#searchBox{
+  border-radius: 30px;
+  padding: 9px 16px 9px 40px;
+  border: 1px solid #ddd;
+  width: 100%;
+  outline: none;
+  transition: .3s;
+  box-shadow: 0 3px 12px rgba(0,0,0,.08);
+}
+
+#searchBox:focus{
+  border-color:#ff4d6d;
+  box-shadow:0 6px 20px rgba(255,77,109,.25);
+}
+
+.search-icon{
+  position:absolute;
+  top:9px;
+  left:12px;
+  font-size:16px;
+  color:#888;
+}
+#header.scrolled{
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+
+#suggestBox{
+  display:none;
+  position:absolute;
+  top:45px;
+  width:100%;
+  background:white;
+  border-radius:14px;
+  box-shadow:0 15px 35px rgba(0,0,0,.15);
+  overflow:hidden;
+  animation:drop .25s ease forwards;
+  z-index:99999;
+}
+
+#suggestBox a{
+  padding:10px 14px;
+  font-size:14px;
+  color:#222;
+  cursor:pointer;
+  display:block;
+  border-bottom:1px solid #f5f5f5;
+}
+
+#suggestBox a:hover{
+  background:#111;
+  color:white;
+}
+
+@keyframes drop{
+  from{ transform:translateY(-10px); opacity:0; }
+  to{ transform:translateY(0); opacity:1; }
+}
+#header{
+  transition: background 0.4s ease, box-shadow .4s ease;
+  background: transparent;
+}
+
+/* Dark navbar when scrolling */
+#header.scrolled{
+  background: rgba(0,0,0,0.9);
+  box-shadow: 0 4px 12px rgba(0,0,0,.25);
+}
+
+/* Make links readable on dark bg */
+#header.scrolled a{
+  color: white !important;
+}
+
+</style>
+
+</head>
+
+<body class="index-page">
+
+<header id="header" class="header d-flex align-items-center fixed-top">
+
+  <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+
+    <!-- LOGO -->
+    <a href="/" class="logo">
+      <h2 class="fw-bold text-white">AZMart</h2>
+    </a>
+
+    <!-- NAVBAR -->
+    <nav   id="navmenu" class="navmenu">
+
+      <ul>
+
+        <li><a href="/" class="active">Home</a></li>
+        <li><a href="/about/">About Us</a></li>
+        <li><a href="/checkout/">Checkout</a></li>
+        <li><a href="/contact">Contact</a></li>
+        <li><a href="/profile/">My Profile</a></li>
+
+        <!-- SEARCH BAR -->
+        <li style="list-style:none;">
+          <div class="search-container">
+
+            <i class="bi bi-search search-icon"></i>
+
+            <input type="text" id="searchBox" placeholder="Search products...">
+
+            <div id="suggestBox"></div>
+
+          </div>
+        </li>
+
+        <!-- CART -->
+        <li>
+          <a href="/checkout/">
+            <button class="btn btn-danger">
+              Cart(<span id="cart">0</span>)
+            </button>
+          </a>
+        </li>
+
+        <!-- AUTH -->
+        {% if request.user.is_authenticated %}
+          <li><a href="/auth/logout">Logout</a></li>
+        {% else %}
+          <li class="dropdown">
+            <a href="#"><span>Sign In</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="/auth/signin">Sign Up</a></li>
+              <li><a href="/auth/login">Log In</a></li>
+            </ul>
+          </li>
+        {% endif %}
+
+      </ul>
+
+      <i class="bi bi-list mobile-nav-toggle d-xl-none"></i>
+
+    </nav>
+
+  </div>
+
+</header>
+
+<!-- HERO -->
+<section id="hero" class="hero section dark-background">
+  <img src="{% static '/assets/img/hero-bg.jpg' %}">
+  <div class="container text-center">
+    {% block content %}{% endblock content %}
+  </div>
+</section>
+
+<!-- BODY -->
+<main id="main">
+  {% block body %}{% endblock body %}
+</main>
+
+<!-- FOOTER -->
+<footer class="footer dark-background text-center p-3">
+  <p>© AZMart — All Rights Reserved ❤️</p>
+</footer>
+
+<script src="{% static 'assets/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+<!-- LIVE SEARCH SCRIPT -->
+<script>
+let searchBox = document.getElementById("searchBox");
+let suggestBox = document.getElementById("suggestBox");
+
+searchBox.addEventListener("keyup", function(){
+
+    let query = searchBox.value.trim();
+
+    if(query.length < 1){
+        suggestBox.style.display="none";
+        suggestBox.innerHTML="";
+        return;
+    }
+
+    fetch(`/search-suggest/?q=${query}`)
+    .then(res => res.json())
+    .then(data => {
+
+        suggestBox.innerHTML="";
+        suggestBox.style.display="block";
+
+        if(data.length === 0){
+            suggestBox.innerHTML=`<div class="p-2 text-muted">No products found</div>`;
+            return;
+        }
+
+        data.forEach(item => {
+            let row = document.createElement("a");
+            row.innerHTML = `<i class='bi bi-bag me-2'></i> ${item}`;
+            row.onclick = ()=> window.location=`/search/?q=${item}`;
+            suggestBox.appendChild(row);
+        });
+
+    });
+});
+
+document.addEventListener("click", e=>{
+  if(!searchBox.contains(e.target)){
+    suggestBox.style.display="none";
+  }
+});
+
+searchBox.addEventListener("keydown", e=>{
+  if(e.key==="Enter"){
+    window.location=`/search/?q=${searchBox.value}`;
+  }
+});
+window.addEventListener("scroll", function(){
+  const header = document.getElementById("header");
+
+  if(window.scrollY > 50){
+    header.classList.add("scrolled");
+  } else {
+    header.classList.remove("scrolled");
+  }
+});
+</script>
+
+</body>
+</html>

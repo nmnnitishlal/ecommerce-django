@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h2><i>Welcome to</i> <strong class="text-danger">AZMart</strong></h2>
+    <p>We are team of talented designers making websites with Bootstrap</p>
+    <a href="#about" class="btn-get-started">Get Started</a>
+  </div>
+</div>
+{% endblock content %}
+
+{% block body %}
+{% load static %}
+
+<section id="portfolio" class="portfolio section">
+
+  <div class="container section-title">
+    <h2>Welcome To Our <strong><i>Shop</i></strong></h2>
+    <p><span>Check Our</span> <span class="description-title">Products</span></p>
+  </div>
+
+  {% for product,range,nSlides in allProds %}
+  <h3 class="my-3 text-center text-success bg-light" style="margin-top:90px;">
+    {{product.0.category}} <strong><i>FlashSale</i></strong>
+  </h3>
+
+  <div class="container">
+    <div class="row">
+
+    {% for i in product %}
+    <div class="col-md-3 mt-4" style="padding:10px; perspective:1200px;">
+
+      <div style="
+       background:white;
+       border-radius:18px;
+       box-shadow:0 10px 25px rgba(0,0,0,.15);
+       overflow:hidden;
+       cursor:pointer;
+       transition:.35s;
+       transform-style:preserve-3d;
+       position:relative;
+      " onmousemove="tiltCard(event,this)" onmouseleave="resetTilt(this)">
+
+        <!-- ❤️ WISHLIST -->
+        <div onclick="toggleWish(this)" style="
+          position:absolute;
+          right:12px;top:12px;
+          width:38px;height:38px;
+          background:white;
+          border-radius:50%;
+          display:flex;
+          justify-content:center;
+          align-items:center;
+          box-shadow:0 6px 18px rgba(0,0,0,.25);
+          cursor:pointer;">
+          ❤️
+        </div>
+
+        <!-- SKELETON -->
+        <div style="width:100%;height:230px;position:relative;">
+          <div style="position:absolute;inset:0;border-radius:18px;
+          background:linear-gradient(100deg,#eee,#ddd,#eee);
+          background-size:200%;animation:shimmer 1.4s infinite;"></div>
+
+          <!-- PRODUCT IMAGE -->
+          <img src="/media/{{i.image}}" 
+          onload="this.previousElementSibling.remove()"
+          style="width:100%;height:230px;object-fit:cover;
+          border-radius:18px 18px 0 0;transition:.3s;"
+          onmouseover="this.style.transform='scale(1.06)'"
+          onmouseout="this.style.transform='scale(1)'">
+        </div>
+
+        <div style="padding:14px;">
+
+          <h5 id="namepr{{i.id}}" style="font-weight:900;">
+            {{i.product_name}}
+          </h5>
+
+          <div style="color:#ffa41c;">⭐⭐⭐⭐⭐</div>
+
+          <h6 style="font-weight:900;color:#2ecc71;">
+            ₹ <span id="pricepr{{i.id}}">{{i.price}}</span>
+          </h6>
+
+          <div style="background:#f6f6f6;padding:10px;border-radius:10px;">
+            {{i.desc|slice:"0:55"}}...
+          </div>
+
+          <!-- ADD TO CART -->
+          <div id="divpr{{i.id}}" class="divpr" style="margin-top:10px;">
+            <button id="pr{{i.id}}" class="cart"
+            onclick="floatAdd(this)"
+            style="background:linear-gradient(135deg,#ff7b00,#ff0066);
+            color:white;border:none;padding:10px 18px;border-radius:25px;
+            font-weight:900;box-shadow:0 8px 25px rgba(255,0,80,.4);">
+              Add To Cart
+            </button>
+          </div>
+
+          <!-- VIEW -->
+          <a href="/product/{{i.id}}">
+            <button style="margin-top:8px;background:black;color:white;
+            padding:8px 14px;border:none;border-radius:25px;">
+            View
+            </button>
+          </a>
+
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    </div>
+  </div>
+
+  {% endfor %}
+</section>
+
+{% block script %}
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+<script>
+/* CART LOAD */
+if(localStorage.getItem('cart')==null) cart={};
+else{ cart=JSON.parse(localStorage.getItem('cart')); updateCart(cart); }
+
+/* ADD TO CART */
+$('.divpr').on('click','button.cart',function(){
+ let id=this.id;
+ if(cart[id]) cart[id][0]+=1;
+ else cart[id]=[1,document.getElementById('name'+id).innerHTML,
+ document.getElementById('price'+id).innerHTML];
+ localStorage.setItem('cart',JSON.stringify(cart));
+ updateCart(cart);
+ festivalConfetti();
+ showToast();
+});
+
+/* CART UI */
+function updateCart(cart){
+ let sum=0;
+ for(item in cart){
+   sum+=cart[item][0];
+   document.getElementById('div'+item).innerHTML=
+   "<button id='minus"+item+"' class='btn btn-success btn-sm minus'>-</button> "+
+   "<span id='val"+item+"' class='mx-1'>"+cart[item][0]+"</span>"+
+   "<button id='plus"+item+"' class='btn btn-success btn-sm plus'>+</button>";
+ }
+ document.getElementById('cart').innerHTML=sum;
+ localStorage.setItem('cart',JSON.stringify(cart));
+}
+
+/* BUTTON + / - */
+$('.divpr').on("click","button.minus",function(){
+ let a=this.id.slice(7);
+ cart['pr'+a][0]-=1;
+ if(cart['pr'+a][0]<=0){
+   delete cart['pr'+a];
+   document.getElementById('divpr'+a).innerHTML=
+   "<button id='pr"+a+"' class='cart btn btn-danger btn-sm'>Add To Cart</button>";
+ }
+ updateCart(cart);
+});
+
+$('.divpr').on("click","button.plus",function(){
+ let a=this.id.slice(6);
+ cart['pr'+a][0]+=1;
+ updateCart(cart);
+});
+
+/* EFFECTS */
+function toggleWish(e){ e.innerHTML=(e.innerHTML=="❤️")?"💖":"❤️"; }
+
+function tiltCard(e,c){
+ let r=c.getBoundingClientRect();
+ let x=e.clientX-r.left,y=e.clientY-r.top;
+ c.style.transform=`rotateX(${(y-r.height/2)/20}deg) rotateY(${(r.width/2-x)/20}deg)`;
+}
+function resetTilt(c){ c.style.transform="rotateX(0) rotateY(0)"; }
+
+function floatAdd(btn){
+ let b=document.createElement("div");
+ b.innerHTML="🛍️";b.style.position="fixed";
+ b.style.left=event.clientX+"px";b.style.top=event.clientY+"px";
+ b.style.transition=".9s";document.body.appendChild(b);
+ setTimeout(()=>{b.style.transform="translate(-400px,-500px) scale(0)";b.style.opacity="0";},10);
+ setTimeout(()=>b.remove(),900);
+}
+
+/* CONFETTI */
+function festivalConfetti(){
+ for(let i=0;i<25;i++){
+  let s=document.createElement("div");
+  s.style.cssText="position:fixed;width:10px;height:10px;border-radius:50%;z-index:99;";
+  s.style.background=randomColor();
+  s.style.left=(innerWidth/2)+"px";s.style.top=(innerHeight/2)+"px";
+  document.body.appendChild(s);
+  s.animate([{transform:"scale(1)"},{transform:"translate("+(Math.random()*800-400)+"px,"+(Math.random()*800-400)+"px) scale(0)"}],{duration:900});
+  setTimeout(()=>s.remove(),900);
+}}
+function randomColor(){return["#ff5733","#ff9933","#ffd633","#33cc33","#33ddff","#9933ff","#ff33aa"][Math.floor(Math.random()*7)]}
+
+/* TOAST */
+function showToast(){
+ let t=document.createElement("div");
+ t.innerHTML="🎉 Added To Cart";
+ t.style.cssText="position:fixed;bottom:25px;right:25px;background:#ff6a00;color:white;padding:14px 18px;border-radius:14px;font-weight:900;opacity:0;transition:.3s;";
+ document.body.appendChild(t);
+ setTimeout(()=>t.style.opacity="1",10);
+ setTimeout(()=>t.style.opacity="0",1500);
+ setTimeout(()=>t.remove(),2000);
+}
+
+/* SKELETON CSS */
+let style=document.createElement("style");
+style.innerHTML=`@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}`;
+document.head.appendChild(style);
+</script>
+
+{% endblock script %}
+{% endblock body %}
